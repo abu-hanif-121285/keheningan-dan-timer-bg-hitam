@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAH Silent Exam Monitor - WAH Official</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Orbitron for futuristic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            cyan: '#06b6d4',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        digital: ['Orbitron', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom UI Glassmorphic Styling & Glowing Effects */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1329;
+            color: #f1f5f9;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .digital-font {
+            font-family: 'Orbitron', monospace;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-panel-light {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .glow-quiet {
+            box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.35);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .glow-detected {
+            box-shadow: 0 0 35px -5px rgba(234, 179, 8, 0.35);
+            border-color: rgba(234, 179, 8, 0.4);
+        }
+
+        .glow-noisy {
+            box-shadow: 0 0 35px -5px rgba(249, 115, 22, 0.4);
+            border-color: rgba(249, 115, 22, 0.5);
+        }
+
+        .glow-danger {
+            box-shadow: 0 0 45px -2px rgba(239, 68, 68, 0.6);
+            border-color: rgba(239, 68, 68, 0.7);
+            animation: pulse-border 1.5s infinite alternate;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+            100% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 50px rgba(239, 68, 68, 0.7); }
+        }
+
+        /* Mascot Robot Idle Breathing & Expressions CSS */
+        .robot-head-container {
+            transition: all 0.5s ease-in-out;
+        }
+
+        .robot-breathing {
+            animation: floatRobot 4s ease-in-out infinite;
+        }
+
+        @keyframes floatRobot {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(0.5deg); }
+        }
+
+        /* Background Canvas Custom Container */
+        #bg-canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(135deg, #0f172a 0%, #16324f 45%, #0b1329 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background-color: rgba(11, 19, 41, 0.85);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Scrollbar custom styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative text-slate-100 antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Dynamic Default / Custom 16:9 Canvas Background -->
+    <div id="bg-canvas-container"></div>
+    <div id="bg-overlay"></div>
+
+    <!-- HEADER BAR -->
+    <header id="main-header" class="w-full glass-panel px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between border-b border-slate-700/50 z-20 gap-3">
+        <div class="flex items-center space-x-3">
+            <!-- ===== LOGO WAH OFFICIAL (Gambar Asli) ===== -->
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 overflow-hidden shrink-0 p-1">
+                <img id="wah-logo-img"
+                     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAACrCAMAAAC+ALLNAAAC91BMVEUAAAABLWsALm4ALGkAR5gAQpEAMHIASpwAP40CMnMARZUAM3cAN4QATJ4APIoAOYYAW64ASZoATqAAQ5MAUKIAPYwBZLYAOogBYLMAU6YBZ7z9vS4AXLECOH0BLWwBc8YBd8kBMHEBb8IAUaUAV6wBLWsAVrEAP5ABbL4BL28BLWwBN3wAVKkBWaoANHwCi9kANoEDmOIFMXABe80AX7f8tib7sCEBZLoCLm0Cj9wAfNgCqfACh9YCgtEBNnsBLWwGe8sCk98BLm0BLm0BLm4BNXroqSMAgt0DrvIBL28BLm4BLWwBLWwDnOYKidQBftABLWwFeswDsfQBLWwBLmwBLmwBMHL4pBcBLmwBMHH2mgsBLm0CNHYBLWwDar7bmyQAacIBkOUCZbz3nhIBVqgCpO4BP44BL28AiOADoegBL3AEo+oCjuACV6sAYbwBmOkAWrUDpuv1ohEBLWoBn+z+wzIBMXQCbMIAdNIAPo0CgtUBL28BeNEBTqAGoecBRpbvpyACccgBUqQDY7cCXbEBQI4BLWv7qxsAM3gCZ7wCSpsBPo0BM3cANoECX7MBWrABRJMDfNIDtvcBTJ4Bh9wBYrcCZboCcMcCZrr0ryMCRpUDbML7vSwBMnT2qhcIqu3zmxEFNnoDedAMm+IBbssCi90BasABVqn2ryP1rSMCn+oBVKcBY7gBT6IBfNUBasEBWq8BUaMDtPYBWq8BQ5QBe9MBPY33qh0DpOzyriX5ui0BYrkBWa4AR5gBa8H0nw8CjN8Es/QBeM8DidwEnef2riIAOIUDoeoBedEBM3j6vSwBWK0BkOL4syYCcMUBTqACnukBQpL5uiv0pRoDjuABZ74CftMAM3r1nhABSZkDR5YBP44DmeQAM3kDo+ufqW7ltDoDmuQBMXMBZLoHoui9nUYCidz5tygCNXoGru+Cnn0DpO0DpOwDsvTtlxIyhLJXZmnzpx/TsUeVhFJmnZcBcMgCftkRpeIhjcciZZ1Of5JFqLZDZ3+BscsRAAAA/XRSTlMA/v7+/f39/f0H/f79/f39/f39/f39/f39/f3+/Qu1/f0s/f3+5f3+/SStEf79/f39/j/9/f39/YP+/v39/R97B/7wkzkVC/38bWbXwf4M/coS/aiLc0b9WU39mRpRGQT+/S/9+/1AM/79XiNCJf79/fuv+P3890X+7/3370YabSghu14/0qD+8ZVRp6aHfXBgOf3z7ueofFAY9fTX0b9q6ehdNP7FuqhaR/Lcx5mJa/Pr3tLCurePhWn38+fdy8Gkn595Xjnx3MvCuIrz8OHRrY6BelDq3NrPezPk0bR4/v3q3tqY/NqmeE7+zr+5o/397/799tZs/v39/fv933btzgAAG1VJREFUeNrs0bEKglAUxvHzHj2Ki5M09QAuDuEQud5VfI3ggkKLNbaobYItdwonhxCaIoqeoe4riA3i//cAh/N9nwAAAAAAAAAAAAAAAAAAJs9L8jaXmfqFL4zWWSUzZJc3WilluiyRIdyVKxMV7A42vKWLzv8EMkT6etdlE8XyF3GUlmXf7Mcv2btUD31eLJRl2sxf5zJIH4aO4yxPdTr+l9v+dtxY9+tz7ONfWs0sJqorjOPnAcISoSCLgphamSiNUDXCGNfcPpT6wpjxoSTGjHRAo4FRMCZUM+wQA6QslR2jBgRkFQQE1yKgEhdEBesWrRExbrVatetD/98558Ig0LQw/bfpPHDnzvl+51v+594mXgyaBXEA128cXL/+VjGblLp37twEAOvWrTt69qmOWVP99xaHhIRs5aoZjGTWVfHhiyc4gH2HKf71bZNdZc1OkQNgsOalNTeq/+FiKERq64sJCSjx8ZGk+H/8cR0uUi9Tq6Bt36xZF6vbwhH/wXNsciqv2QkClAQcwdlyZiWVDy37HCIIAkSffvzwu/vuXeB63tetm7CZ3H95VNXZEZSJx6+f+2k96ftgNjnpu9v7nossWMML4YB16kDXsXDhMggUVAxdbDx1XZZpQtUyqJ8g/pdr1kHfCb20bNk31nPdmMQA1KsTML78QN8FEBAIzsZbpQDyVq5cCEkGBOHeeEWQNER/F0kC3Wfjql1mqETwlI3oMI9/MiYgt6KitaOhq7+cqCuRB17ErBDd8GXkf+/3T9vPktrVr+pbV61atRKSDDiH9vFWkYcLRorl3rj045+LPrVOpsGBkWm4sfgW4p+UCTD0LP+SlFfR8b5ch6TtBgIC/Z8JlJ89yteF1akxli1ZsnYVtBsIhJYtXJaXy8YoapWAJNPkYfkEjWqT2qqhEQAbq4NFDUzKBDQsBwHSli15FV2wAfoDF1bwX0GR/Xvp7h8laqQ1a+6rcJeAAIQ0IEkMHcpYAGZJSSTJ5Sg2jqLQqTkCWQnDAKpR+omTNgG55uWQQAAGHf0Ki+yL4QjOKv8+/sEYrErqqMydwo/nzJkDBjwNEOFuxAjljQ0v1gxMkgEoTARg+06JgDNQARTvpwNQ22RNgNL6DRFQIQBBFNO112yK2bQipnvsuDAZjcYk3dj+FANhVdCKFWdlZ3v3MSQYUHyCAtSqGwuAX0R/pjzJGx/A5e0QIRAMJIDgttfU+84dnKwJKPuGJClwBA3x7H7Nzq0xm55HfhB+Vl3+wMBAb2XRh2t7uDWGI+D/PJUJMBcCATUNJAR8lI0BMMyJE5oIwNfbLRBIABuva59spM8dOyZpAgwNnQ2FhQ2dna031WqoyGUHasi+to+Ov8DTc6m3t59fWOmR0QXQR+M7RuqF2GBjr5+fn0QgGSBAaMnaHsOHAEplrkhMEwH4WiLgDASA41rtcWGHzk3ZtRhyyxp6zMRgqJ/dp4k8eh5lz5zpKRH0GkctDX6XeAkIYmFKujculAgEBEkBKhwDYPgqwmSeGACkIjhA+378yp7HU/etsyEHScH4vhUMzGW6wcWQZRcw1vr4EIKlS739wixDUDpofqtHnucCWmq+pycIEAILBlLvjB8CUK/imCYCsEUQkGkAAME3rmivvJ2qZ9uQ2dLScuxYZua3OZtXg4MuqtO83NwfX4GJ3GcxCOoDXFxAYCblgPcZg6WNETYuhKtdQClQs0VFMIpBwwcATo7KFnPsuADytkDDCEK60f+0e/Y8GJzy/h+bP9/DecaMjz6adv6HzGyjgpA6zTdzo/KWLRsaaYNxTREBAgHlgHeKhZXA8BIIIGliihpx3TCC0vQCiYDr0Me9o91Q6knc0gLBxAAgQeBhuz7xiVa7582fT9lUtXnXfHsBYNGiRb4DlSl6ppT19CQ1YCb3M6kFye5eEQEaQQBxFSjDDvimsDDC63eIfpkskgWiVpDODJUiDeZ+PJerQDcaQCBRRWmFheGq0gkAfDlC4F4/q96v1Wqv/PlCz6Yqh0xKAQIwbdFnztvCSutSdCypszByaOXCLiaVMH26u6+Xv0bDIwv0zB8u4y7MNkJgaeKyRbJIBAVYo+nM3GEhyNKiUQAaZwYGBlK6hBGCCQFAHMDljkgqf+gZ/NDUFYcUEACQAv5h27adLDAyXVlS2e7dHUzIdNXOabq7l5e/vxpZ9vBpghyMeuqr0PGrmwNAQGaLZ52JdwqMRWiuXxj+GxZWqR8FwIcabCBlASBMCEASqOhXzl0MgrQPfn1O95l6FwAAZ1kDbttIj1DjOn3rctW1XXO0AQHKAYoMqw2sk798BG0bBKTXF2PjklcEGoZElZ+Kdg2TkjIgWqK3UIrlDjQSLZ9AECAGEwDYLdzqUJe++PqVINKDX7d2M2soYb49b4PTKAfmIf7AwPwjClzi2h4R5ua7bo42rpyAGtlJsUrDGbRtEBAIKuLFwPT1Uq/zaUwhu0qPKrK8VVGcdQYLABEajSDAGeDWY6W8X0662RAZfHhfkNz/TX06Zg2tPo0mQAQIgCsHEHgyS0F63zTwFMm0tZUE0ArlNEhnpBS/uZIAqUsMTHdcJgm4ZNHzCu1r+DRdgfdS9DrIk5RtCUB0FyQWNA4AfS63J8t7uhD+xRM8/hPPFu+8UM6so2tog2oRzIgmANHRjVhhYW8SgzJ22QsCdk4jBJrpT7pKP05A+Nyb/OrUJg5KlEGVHi51nzYUTh2jwFMqEKVB31cB7PWl9kIIfKLBfgSAok/KLSvs7DHjuGJuLTPIx8BA8OPbkO01VikAOQl5DXACdgLAvFOxzHiGVrngmIe9vb0gwEMTBKiKi056g4BqYjv5UKlycuLFQtc1m+BX27Ta0NDDVBuPRPwzST5ZFgBwvZwxIEAAFIMpNqUwvfJML2I/hOh7GnJ1idex+7NmBQHBmz9hhtoVZiU5HKMMkACco7chfhDAHhUSgAT8DQDUKqBGQEVbpTAF5yMiIBCYc0U0rrgKAQFBbSqdVK8QgO+LiVe+TAAf6JRxBADdVhJAJyjIQuQDpWHQIVJva2Guvrj6CR6Ai/BPPPgNZmhQx6ymBAAYMUMSwLxLzIge8GnajBnOHjwFOAHaXQKAAFLzZ4KA6uA6FeoXyciTpqvJyclXm5p4q28LCgIA8dbqSH5dQXp6ekGzD9pDvQUATsDXXzNP9MJtEHcFpb2V6WVGHd4A4h2YVNCbtwthhjr0zHpaneYBAs5iENhGUwVAp1IZ9O0MCASQAm40DZ1UAtmsCnOOCECquckosXFNvrPAgTkY7vCvF+8jAOHh/LyuGMWqDVUuLhrcXgVAd6WskVXACSwdOFNQWJSkK5ZvAFX9+Ow3mAGrxg9d84CkG5rmTwBItEd37n5kQQDbKw2BxiW56JSLCwhIBJWUkV+0ONrszaBXOPEyQc+dEADkQ2tdZHlUVCQOCy4B/lWKBFBCd5W35WYTiZJVZDQE8+CvzFLfAFL4D159ueXLLZe75Het2AZhBmQbcET8XMhyh8xp0z6CZgy3AQLADUFjc0SAJEAIjvBawhUtC5RBvOR5MdhPtiBRZgA1AaW8q+Lew5qaPp0+WRPh1RQnf7zExsaV7kudMOJU8qUUo96h+Bze+lPwMnwShb+b7OBQtyGJWVV0JrRX+8CMeRIAusBX5xE/JNqAHAV8FgQEUJ9XDS9OyLyUbN1sEvAAMyZma8jiy/e6gKB6X5A2PPwWEqC8Q5ycQ2qespQILy/3qtkSALoLH7K+tfUpJl1wYvV1bLw2CFLjB4FZb569EnawI9JYCd5WVYKtSgBVYKcCaDYdQ1cYJjBftgFBwB2ngxHPz6fabSA6bWKDm7Yi/s9xPKrAZDgOAAerYSzFuZEQ9CmGZi93dxSLAACwILA3OcfEiqtv7H/NTzpBJF78Ivff/iYeXFaUGcreHbIyAOzdfEkAAJxFCmg0jZnnp5EkgV0iBUTHcseOqY4XVWuiU1AaLqhnkRcQPuJfuHDl7ptFLPiJNrwNrsoMwyiPzg9zWRYAOiUvkPWH+5ZkxinB1W23Xofu0UISgGx8j5+9mvONMMNdScYCjEhrA4AbRA7QLKBg3WUK+HugJ3IRgV0JaRyAaFhOrija4WNPOr8HiqRkM7uP3cf2I/y1S+b0xrLqK+iAZWb+1FM+/W/AiWG6k51rjgCA77XEseLj+1+HhobuUQEIAifePHiL6CERvikrHyPS6gCwCjUFIFuRAPNcRfQSwbHZ12xtebUCwHS0LdSAtLwYaTQw0CaOzdbfW8zDX7lq7Rw8AzljCN7/00Zjr3gmJp//wzXXT7dzRcPkP+2869oXwcdvhZL2AIAQCgBb/0fpIVhBCGb4PcJvxpTEodHqAGa3UBfgwxDyFQngTJEvkklw/iss1U0OgumuNjZyHhCCKoXPUrilHBZVQRrKW7VkDh4A+fllsRuHWTqepZJbMr9r7YRaY2n62ziW5HAAd3NY4o7wUAlAEqDgX/nBDCJ+YYYNqZdqNRphlawOAG1QJYAscOQpYDPNUpkOGBYEgBcBfch2CAQZPA4ASPuC6eP1Oh2dYjp7Ef5Sz+akxGJjPj1NLa0szDXoxP+YBs8IAI4tX+CLaRms+lZ4eDiFDwDQj49/+eN3WEHphs2tDbEGU05Vk/TL0f8HgE/uuhEBVIEH/vUXHQCJr8Z/fjO1eRWADT4EAXJwaGZwDB4AcJuSyWAyJZFRMxY+8pzp4gJHnIVR4VlXpKfXa6mQyaCwHFcAcExA6SD+g+HDCRD6+Jeffw/gdhjxD7yrbIAZZhvqT3Pevv5AMM8nMJtZXZlubkCAHCAINgBgg5lIUhOAlzlGNnybnaMAIAi4J/AEwKDclRF3uyr5am1tbXNVthEIChpdNFXYbX/NqSw90xel151qbGxqarpadTvnNOJ3S1vNHFjirfUSAKL/63ecCaKjT9K54Qj8oCJnpQAuD03R1gcAGw8ClARcdr52siMCARKBEoC2mScAkld8QkBwdTX9xRkASk6X0DKFV84viGVKVqN/8uzVtb6nipjuSF2jj4tG448JiBGwtwTxu/GcaQuHQOD1Lz+XTPf1j6iFG0w16aXdtXBLNIBwZACh/wHAghZHviIwICEXkA3DDJAApBzETQAgVyGs6bZIAHLLbvLQDKdID87Sk1h2RK3hzt6mDGTDSdRDQADipwmILupIP5a2gQV/H871+C/czMm9Ks6gjDOl+AgmH8rxAoDVlYAlcQRYF8Qh0GAkCLs2My7TaQ7AVRVlAbwf2qOlWcYaOQDUfaxyqckU15TDUvI9Z/oAQATffzV+W3v7BFaMCsBx6Wd7nuS+GeOPadBVZzA6gbUByOAIAUEgcQzqYEACCNXbjRb2rJ7q5zw4DQMgi6QRFvlR7IJ6Y0a9kjLgSQBwgvClBKD4CQAAp23YuGP9esTvKL67dwIAHurdyYn6Wh8ABYd94XJUpTaFu3csnl4IieDxuTeOHps5Q/KZgQ0BQA8AAbzueGT8m13zd20ijMP4u3h6RAXFoBUzBEUJ0UOCEKcgmBPiIAQ0GHsG0aEQyOJwxUGCsYErTZOA1BYkwy3t0BYRi5NmFEKG4iBBJYtdMongP+DzfX/UnN5Jl4MIfjRqwrXe87zP+32/9769X/lcWfmYxlYYdgHEBIABQv8BtJ4jWgTufIc6PsJBBoiHEV6EUWVCMQC9CXFE+SBHCR58YApz+6jgkDKiFkNpIP1iiMTm6fpav9XqP99YSqdXS7QdeDK9szrfbDX7tVce/agv9cy1hw9+HBYRRwXxN+D98d1HcqoyVRYCydohoWvMBz4fKACK/jFa+YCwAYmVAYiq28MAbVYYJ3+/uZNusivz6Y2XFVHZrjzepgkg9Ef5QltFBL7Lr8aXBxhwUDyRynlQZWFQhSoo43AjpAcqAGLb+9hpgEKEP+QTXftR1KN/uzRWWeY3SnNdHLnu0n6mxl8eydWta99cqQ3iAgy4CAeO46pz3IFwDKisQ5eQRxyFBeQByvwvYjX0vuenJLwJSm6he+QTQJZA792tzD6d8663avyj4jDiYI6lXDG69FwcZMBFsoD+o3PwqcpCYXNKqDstkB58YuO0zqMRuXABDQ2YWs9gSKMAAZBVjALgIZ//LWgIAOnfPZHsWPrCcXwHHgJ/A1KOYXAHZK0JyYC5t9AFZZIp8oAaPW9MUOAJNHUXzjdRF+u4J9EEiRkgDAvGqlMAeJNF+g3DyPFGCi7+1QDlAGUlJAOurJ09A7g6IDxoMS/NUwK6iM5+2ugZAQIg1ig1Y4L5xCeAPI40QM/UF9TeM7ZUfMg6hnQA18GpNguH+69JmtLHPaiVmJcnr09I+OGvuSX079tjAECmLvWLAIAytl9pcPGN6qZvagaRCDkgLDiMzjQkVpYu0SEt1EkX3j72uYZOePE60aeiLuSrCrB/zdxDx/FFHsUpA4YxfYHH+/CjgLFdjMABEQJc+CbJwuLpkjrD5j4sPfW7Zuck8bGfF4cqWJuk/iPPNs097cAtPBL6pQG9JCJAY/ulqgekZqgcAPUZFh4r3bEfZdiY9Z8py6vd1fk5oWWrTrwD21sfHutsT+if26PFX2TxURF/t+MsCDM3HLjEoLeYYGFSWu6+uEe86C6XWAA38jeYJGmapmVlgBVjYRLLxIlEkoVNafYlDnGXZ0vsP//5g0yqfP16OZXQ/0hoIlVIxWPyTTxVKMzQZmk8mwlI9EwqE1wjEsi6xSYO83Zj4BjAGQyve27fyg1dx3HckShYPdcBN1nyqusMcrqfkQ3X6ZRZALmvKHe9OJss9GLPNgy+GtGrk0uOrVL4nGioJYvo6WX62M36Luzga1A9b0SIIpsozEUH4vELv/HCvxoZFWe6YWWAPq3eDHXIBGUfM7lJTuFvBtiTZYAlRHroyY6kAGtsumV7RA8uEaBptn2VlW1N80/A1QgYBCdA07TJMiAp9duDxs2bjY4tHRAZuEz3G+nk7hZNxkYRDXRuFYsWS047tjvyqwGJoWMPyuzfMWBk80HuiNpnljsaZ5qLa2hj9zvN39yVUZ8pBJSyWLYQ3NE1tEkz4Cd7Zo/zKAyEYRtLSDkESBQugI4qFUgGimAKJAJKFFIj0SKlSR9tsVfIgfYE26faY+yMDSTeH2lLF/tKXzw/8CnzeMYoyfhycZPfB3MauSicYm/4hiZP4nhHvDJanRjrT5JkvScuqv3x2CWldiCzEginfZ5n5xKp9H1gI4C9i/o+fvSw7oGvJPCfAq27fD5/pBE6jnOXTeMH5MRvQrwSVXFVf3FRosHHx16I2+2pCAzZ66YKrq8VBCFqH4C4cVHdZ6xS7/qV9ndnU1SIt3M/L9xOcHUQ3RxXy3HbgUToCURTfFvjDpfw4opRA7hbBGCEuqBYY2jTp6uq/ATgbwAoVQDQdCeov3GUqSA4UHiLLgIIpI69hQBwtQnASRXpm8d566AOGsC8dAA3O0AZE/Fax1UhccfXbEciqgBgRl/M+QpSFKS1DcDBQV3MYK6C+7jKJKxU5F1XeBM4lIKTZVVJ9mg70wLwHp2SPnuK/Y7sIgYZAHDVZfvXIDi3YFOH2gig+jMASgEAnPU+ZnmgwxEFLc6eoqalWXIPY2EPyy6iGsDDQUZtiRkvR1sDwBG6EmukdpCaI7CL1NvtCPF8SK4AdgYApgAMEheZft5MGQMAcaOuHnU0lSsAXGeLACQCN1uah6Dq9fmsOmCtGR2w2eIcGWMAYBQUdDHoMQUg4JjZyD7YAgDX2aIRGNSUzwfjXJjV5oW6ZhMA3QCA6FQoAEcTAEgDYKzdpgqCCACydgEgF9XucnxHAklRD9g8zwSARZgA9D5Hu18BzEmqANTeGrUWQC8oqtkIBLUKiJ4gAGYAAJkASqkIFb8DiBsGBMQy7QWnENUAmFVnANldqJLUH4aGSmq/9RBA/XcAqIo8KIjVKpjkxQagJxeGGZloqIy9ATCrAJCwoUqzjI7HVs7aa0Lyhw6gvwJYG0jmXddyJosNwJJh/HGocslWAK19AMi4EMDH1yqo5B8A0AkaiKlbUbA0AVkB6NZiWlYDIIE/U0NOPRLj4P/rY5CQ1P+EN5+IvwAgYc0WMPBn8QiA4k7SD8msJH8FIH4BQIZc0LV1+D7eRgAItDNb6DT1ZwdY9RTQSg8+nyke0LzOwnc8e3HO23Jx+Nu5SrCbQoHpH3hyzEJeEnA7DvJTNUEnn2OGX0J1vT+QA2Yb274WR3lBX3XZ4RrExjMiDcMwXp3ww8HEsPHrp+qUDOYt+r9eq+mMRAeIljpr4w8j//VfP9upY5WrYSgO4GcS+hA90OEOTbdMmRowrZA0QyBJSUmDY6Gjq4tT30Lfw8nZ2TfwAXwGk0/FKwgun4qYH/cmJee0CX9K/yfDnoe9gTv90R9l6sZjnuCnxgOKuQVoZviV+Xj4ZszQdQBwjFN7V2vyRn33cEnhL/Cmh0PTH5Zc4mUSiW+khXsDn6FQF2StdQ1I/GUCE2tgNYg0SIDGShy/h60DKCcdZBRb+P2e34GMPfEgXqZBsmk4Peub4Ig4Qhs4EVPacAgTQOrb0AfFjnBjNMExqWs4exj0U7qbZTwc3w/F5TB7rro9D/vB+Ngproaeu6MPAAF3ftF19sxII1jfnoyWJG8XSOHFKHlHDeP7D2cs4FG9+vTiztsSwOv3m16Cswy3hVkRDDdCkdN4I6RNmukDGrLtOiwuorp5b4E7hQ5HGNBEbwzVzgq+SKMc8puMhC9r8ujkIpFTfpFkGwh6jYJHQXLH69zvkesD2svrTuUADu9IWrhmAPD2xZ1Prx43gBfvsjdfvPtQAojxo0OpMWql50SiAyYUPkySpKdPJXwNwPSTnkwfSAng6W0DGFCaxWt5i+RiEYTDBISZFTCdQl/8gkC2aPVJcgA3s3Tc6lyUetwIKrgUHDlur6KP1F36xMbHEsC38xUvXsGjev7sTnm9nKB4oCIxnFTviTCcSJTE44Q5gLAw3QFYHpagxxLAdhqKwhuBOwx6U2IyYZGJcgeCRxsWjjEs3oTLckOFILlXkRYCTiZxS9i6SN1vJF5UJ2CaWeTRX5bJHEAr40/O+HspCW3D6ESQd2KgrL80kcntEVEmtoqBnQBJk4uKuXezI9RqVIHPcYNWTND0cVeIW5AgQyeEUUeMS2CEcL+g7RSSuJWPIAPFlKdIbBL7xDurWQtshVFIH3hAK1bXJA9/WtOUAaCd87/8mrltmjwNeWqg/dIwDOUSmrycO0ulrJelh2GeoaxAYl5PinHTwdyCv4ZSK7d+3aM88NuTyoZfCln7dYfc8E/rPVuhY4xCMa1QVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVPZrPtw56EIYCy/YAAAAASUVORK5CYII="
+                     alt="Logo WAH Official"
+                     class="w-full h-full object-contain"
+                     draggable="false">
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/50">WAH Official</span>
+                    <span class="text-xs text-slate-400 hidden sm:inline">— Wiyanto Abu Hanif</span>
+                </div>
+                <h1 class="text-lg lg:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                    WAH SILENT EXAM MONITOR
+                </h1>
+            </div>
+        </div>
+
+        <!-- Quick Status & Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <!-- Clock -->
+            <div class="hidden md:flex items-center bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium text-slate-300">
+                <i class="fa-regular fa-clock text-cyan-400 mr-2"></i>
+                <span id="realtime-clock" class="digital-font text-slate-100 font-semibold">00:00:00</span>
+            </div>
+
+            <!-- Microphone Status Badge -->
+            <button id="btn-toggle-mic" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all border bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700">
+                <span id="mic-indicator-dot" class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                <span id="mic-status-text">Mikrofon Nonaktif</span>
+            </button>
+
+            <!-- Mode Toggle (Focus / Teacher Mode) -->
+            <button id="btn-toggle-focus" title="Mode Fokus Presentasi (Ujian)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+                <i id="icon-focus" class="fa-solid fa-expand text-cyan-400"></i>
+                <span class="hidden xl:inline text-xs ml-1 font-medium">Mode Fokus</span>
+            </button>
+
+            <!-- Fullscreen Button -->
+            <button id="btn-fullscreen" title="Layar Penuh" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition">
+                <i class="fa-solid fa-maximize text-slate-300"></i>
+            </button>
+
+            <!-- Settings Button -->
+            <button id="btn-open-settings" title="Pengaturan Guru" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold text-xs flex items-center space-x-1.5 shadow-md shadow-cyan-900/40 transition">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="hidden sm:inline">Pengaturan</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APPLICATION CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch z-10">
+        
+        <!-- ================= PANEL 1: SILENT MONITOR ================= -->
+        <section id="panel-silent-monitor" class="lg:col-span-6 glass-panel rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden transition-all duration-500 glow-quiet">
+            <!-- Top Status Ribbon -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700/40">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+                    <h2 class="text-xs uppercase font-bold tracking-widest text-slate-400">Pengawas Kebisingan</h2>
+                </div>
+                <div id="noise-level-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                    Sangat Tenang
+                </div>
+            </div>
+
+            <!-- ROBOT MASCOT DISPLAY AREA -->
+            <div class="my-4 flex flex-col items-center justify-center flex-1 py-4">
+                <div id="robot-mascot-wrapper" class="robot-breathing w-56 h-56 sm:w-64 sm:h-64 relative flex items-center justify-center">
+                    
+                    <!-- Interactive SVG Mascot Robot -->
+                    <svg id="robot-svg" viewBox="0 0 200 200" class="w-full h-full filter drop-shadow-2xl">
+                        <!-- Robot Antenna -->
+                        <rect x="95" y="15" width="10" height="25" rx="4" fill="#475569" />
+                        <circle id="antenna-light" cx="100" cy="12" r="8" fill="#10b981" class="transition-colors duration-300" />
+                        
+                        <!-- Robot Head Outer Frame -->
+                        <rect x="30" y="38" width="140" height="115" rx="32" fill="url(#headGradient)" stroke="#334155" stroke-width="4" />
+                        <!-- Ear Bolts -->
+                        <circle cx="22" cy="95" r="10" fill="#334155" />
+                        <circle cx="178" cy="95" r="10" fill="#334155" />
+                        <circle cx="22" cy="95" r="5" fill="#64748b" />
+                        <circle cx="178" cy="95" r="5" fill="#64748b" />
+
+                        <!-- Face Screen (Glossy Dark Screen) -->
+                        <rect x="42" y="52" width="116" height="86" rx="20" fill="#0f172a" stroke="#1e293b" stroke-width="3" />
+                        
+                        <!-- Screen Reflection Light -->
+                        <path d="M 45 55 L 120 55 L 45 100 Z" fill="white" opacity="0.04" />
+
+                        <!-- EYES GROUP (Dynamic Eye Expressions) -->
+                        <g id="robot-eyes-group">
+                            <!-- Left Eye Contour & Pupil -->
+                            <g id="left-eye-container" transform="translate(68, 88)">
+                                <ellipse id="left-eye-bg" cx="0" cy="0" rx="16" ry="16" fill="#10b981" class="transition-all duration-300" />
+                                <ellipse id="left-eye-pupil" cx="0" cy="0" rx="6" ry="6" fill="#022c22" />
+                                <ellipse id="left-eye-glint" cx="-4" cy="-4" rx="3" ry="3" fill="#ffffff" />
+                                <!-- Eye Eyelid Overlay for Closed/Semi-Closed Effect -->
+                                <path id="left-eyelid" d="M -18 -18 L 18 -18 L 18 -14 L -18 -14 Z" fill="#0f172a" class="transition-all duration-300" />
+                            </g>
+
+                            <!-- Right Eye Contour & Pupil -->
+                            <g id="right-eye-container" transform="translate(132, 88)">
+                                <ellipse id="right-eye-bg" cx="0" cy="0" rx="16" ry="16" fill="#10b981" class="transition-all duration-300" />
+                                <ellipse id="right-eye-pupil" cx="0" cy="0" rx="6" ry="6" fill="#022c22" />
+                                <ellipse id="right-eye-glint" cx="-4" cy="-4" rx="3" ry="3" fill="#ffffff" />
+                                <!-- Eye Eyelid Overlay -->
+                                <path id="right-eyelid" d="M -18 -18 L 18 -18 L 18 -14 L -18 -14 Z" fill="#0f172a" class="transition-all duration-300" />
+                            </g>
+                        </g>
+
+                        <!-- ROBOT MOUTH / EXPRESSION LINE -->
+                        <path id="robot-mouth" d="M 80 120 Q 100 128 120 120" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round" class="transition-all duration-300" />
+
+                        <!-- Cheeks Glow -->
+                        <circle id="left-cheek" cx="56" cy="108" r="6" fill="#10b981" opacity="0.3" class="transition-opacity duration-300" />
+                        <circle id="right-cheek" cx="144" cy="108" r="6" fill="#10b981" opacity="0.3" class="transition-opacity duration-300" />
+
+                        <!-- Robot Body Collar -->
+                        <path d="M 60 153 L 140 153 L 155 185 L 45 185 Z" fill="url(#bodyGradient)" />
+                        <circle cx="100" cy="170" r="6" fill="#38bdf8" />
+
+                        <!-- SVG Gradients -->
+                        <defs>
+                            <linearGradient id="headGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" />
+                                <stop offset="50%" stop-color="#1e293b" />
+                                <stop offset="100%" stop-color="#0f172a" />
+                            </linearGradient>
+                            <linearGradient id="bodyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#334155" />
+                                <stop offset="100%" stop-color="#0f172a" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- Status Title & Instruction Text -->
+                <div class="text-center mt-3">
+                    <h3 id="status-title-text" class="text-2xl font-extrabold text-emerald-400 tracking-wide transition-colors">KELAS TENANG</h3>
+                    <p id="status-subtitle-text" class="text-sm text-slate-300 mt-1 font-medium">Pertahankan keheningan 🤫</p>
+                </div>
+            </div>
+
+            <!-- NOISE LEVEL METER BAR -->
+            <div id="noise-meter-container" class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700/60 space-y-2">
+                <div class="flex justify-between items-center text-xs font-semibold">
+                    <span class="text-slate-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wave-square text-cyan-400"></i> Level Suara
+                    </span>
+                    <span id="noise-percentage-text" class="digital-font text-cyan-300 text-sm">0 %</span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden p-0.5 border border-slate-700 relative">
+                    <div id="noise-bar-fill" class="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-red-500 rounded-full transition-all duration-150 w-0"></div>
+                    <!-- Threshold Markers -->
+                    <div id="marker-detected" title="Ambang Terdeteksi" class="absolute top-0 bottom-0 w-0.5 bg-yellow-400/70" style="left: 30%;"></div>
+                    <div id="marker-noisy" title="Ambang Berisik" class="absolute top-0 bottom-0 w-0.5 bg-orange-400/70" style="left: 60%;"></div>
+                    <div id="marker-danger" title="Ambang Bahaya" class="absolute top-0 bottom-0 w-0.5 bg-red-500/70" style="left: 85%;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-500 font-medium px-1">
+                    <span>Hening (0)</span>
+                    <span>Sedang (30)</span>
+                    <span>Berisik (60)</span>
+                    <span>Bahaya (85+)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PANEL 2: EXAM TIMER ================= -->
+        <section id="panel-exam-timer" class="lg:col-span-6 glass-panel rounded-3xl p-6 flex flex-col justify-between border border-slate-700/50">
+            <!-- Top Timer Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700/40">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-stopwatch text-cyan-400"></i>
+                    <h2 class="text-xs uppercase font-bold tracking-widest text-slate-400">Timer Ujian</h2>
+                </div>
+                <div id="timer-status-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                    SIAP
+                </div>
+            </div>
+
+            <!-- COUNTDOWN TIMER DISPLAY -->
+            <div class="my-auto py-6 flex flex-col items-center justify-center">
+                <div class="relative bg-slate-950/80 px-8 py-6 rounded-3xl border-2 border-cyan-500/30 shadow-inner w-full text-center group">
+                    <span id="timer-display" class="digital-font text-6xl sm:text-7xl xl:text-8xl font-black text-white tracking-widest transition-colors drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+                        01:00:00
+                    </span>
+                    <div class="text-xs font-semibold text-slate-400 mt-2 uppercase tracking-widest flex justify-center gap-6">
+                        <span>Jam</span>
+                        <span>Menit</span>
+                        <span>Detik</span>
+                    </div>
+                </div>
+
+                <!-- QUICK PRESET BUTTONS -->
+                <div class="w-full mt-6 flex flex-wrap gap-2 justify-center" id="quick-preset-container">
+                    <button data-mins="15" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition">15m</button>
+                    <button data-mins="30" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition">30m</button>
+                    <button data-mins="45" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition">45m</button>
+                    <button data-mins="60" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-cyan-500/40 text-xs font-semibold rounded-lg font-bold text-cyan-400 transition">60m</button>
+                    <button data-mins="90" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition">90m</button>
+                    <button data-mins="120" class="preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition">120m</button>
+                </div>
+            </div>
+
+            <!-- TIMER MAIN CONTROLS -->
+            <div class="space-y-3">
+                <div class="grid grid-cols-3 gap-3">
+                    <button id="btn-timer-start" class="py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2 transition transform active:scale-95">
+                        <i class="fa-solid fa-play text-sm"></i>
+                        <span>Mulai</span>
+                    </button>
+                    <button id="btn-timer-pause" disabled class="py-3.5 px-4 bg-slate-800 border border-slate-700 text-slate-400 font-bold rounded-xl flex items-center justify-center space-x-2 transition opacity-50 cursor-not-allowed">
+                        <i class="fa-solid fa-pause text-sm"></i>
+                        <span>Jeda</span>
+                    </button>
+                    <button id="btn-timer-reset" class="py-3.5 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold rounded-xl flex items-center justify-center space-x-2 transition transform active:scale-95">
+                        <i class="fa-solid fa-rotate-left text-sm"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+
+                <!-- Adjustment Buttons (+1m / -1m / Set Time) -->
+                <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+                    <button id="btn-add-1m" class="py-2 bg-slate-800/70 hover:bg-slate-700 border border-slate-700/80 rounded-lg text-slate-300 flex items-center justify-center gap-1 transition">
+                        <i class="fa-solid fa-plus text-[10px]"></i> 1 Menit
+                    </button>
+                    <button id="btn-sub-1m" class="py-2 bg-slate-800/70 hover:bg-slate-700 border border-slate-700/80 rounded-lg text-slate-300 flex items-center justify-center gap-1 transition">
+                        <i class="fa-solid fa-minus text-[10px]"></i> 1 Menit
+                    </button>
+                    <button id="btn-manual-time-modal" class="py-2 bg-slate-800/70 hover:bg-slate-700 border border-slate-700/80 rounded-lg text-cyan-400 flex items-center justify-center gap-1 transition">
+                        <i class="fa-solid fa-pen-to-square"></i> Atur Manual
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER / CREDIT BAR -->
+    <footer id="main-footer" class="w-full glass-panel py-2.5 px-6 text-center text-xs text-slate-400 border-t border-slate-800 z-10 flex flex-wrap justify-between items-center gap-2">
+        <div class="flex items-center gap-2">
+            <img class="wah-logo-dynamic w-6 h-6 object-contain" alt="Logo WAH" draggable="false">
+            <span><strong>WAH Silent Exam Monitor</strong> &copy; 2026 — Belajar & Ujian Tertib</span>
+        </div>
+        <div class="flex items-center space-x-4 text-slate-400">
+            <span>Brand: <strong class="text-slate-200">WAH Official</strong> (Wiyanto Abu Hanif)</span>
+            <span class="hidden sm:inline">|</span>
+            <span class="text-cyan-400"><i class="fa-solid fa-shield-halved mr-1"></i> Mode Lokal & Privat</span>
+        </div>
+    </footer>
+
+    <!-- ================= SETTINGS & CONFIGURATION MODAL ================= -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-3xl rounded-3xl border border-slate-700/80 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-700/80 flex justify-between items-center bg-slate-900/60">
+                <div class="flex items-center space-x-3">
+                    <img class="wah-logo-dynamic w-8 h-8 object-contain" alt="Logo WAH" draggable="false">
+                    <h3 class="text-lg font-bold text-white">Pengaturan Guru & Kalibrasi</h3>
+                </div>
+                <button id="btn-close-settings" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Tabs -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- Navigation Tabs -->
+                <div class="flex border-b border-slate-700 space-x-2 text-sm font-semibold">
+                    <button class="tab-btn px-4 py-2 text-cyan-400 border-b-2 border-cyan-400 font-bold flex items-center gap-2" data-tab="tab-mic">
+                        <i class="fa-solid fa-microphone"></i> Mikrofon & Kebisingan
+                    </button>
+                    <button class="tab-btn px-4 py-2 text-slate-400 hover:text-slate-200 flex items-center gap-2" data-tab="tab-audio">
+                        <i class="fa-solid fa-volume-high"></i> Peringatan Suara
+                    </button>
+                    <button class="tab-btn px-4 py-2 text-slate-400 hover:text-slate-200 flex items-center gap-2" data-tab="tab-bg">
+                        <i class="fa-solid fa-image"></i> Background 16:9
+                    </button>
+                </div>
+
+                <!-- TAB 1: MICROPHONE & NOISE THRESHOLDS -->
+                <div id="tab-mic" class="tab-content space-y-5">
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-200">Kontrol Mikrofon</h4>
+                                <p class="text-xs text-slate-400">Aktifkan analisis suara real-time di perangkat lokal.</p>
+                            </div>
+                            <button id="btn-modal-toggle-mic" class="px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition">
+                                Aktifkan Mikrofon
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Room Calibration Wizard -->
+                    <div class="p-4 bg-gradient-to-r from-blue-950/40 to-slate-900/60 rounded-2xl border border-cyan-800/40 space-y-3">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-cyan-300"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Kalibrasi Kebisingan Ruangan</h4>
+                                <p class="text-xs text-slate-300 mt-1">Minta siswa diam selama 5 detik untuk mengukur suara dasar (ambient baseline) kelas Anda.</p>
+                            </div>
+                            <button id="btn-start-calibration" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition whitespace-nowrap">
+                                Mulai Kalibrasi
+                            </button>
+                        </div>
+                        <div id="calibration-progress-container" class="hidden space-y-1">
+                            <div class="flex justify-between text-xs text-slate-300">
+                                <span id="calibration-status-text">Mengukur suara ruangan...</span>
+                                <span id="calibration-timer-text">5s</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="calibration-progress-bar" class="bg-cyan-400 h-full w-0 transition-all duration-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preset Profiles -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider">Preset Suasana Kelas</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button class="preset-profile-btn p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xs font-semibold text-left" data-profile="quiet">
+                                <div class="text-cyan-400 font-bold">Sangat Hening</div>
+                                <div class="text-[10px] text-slate-400">Ruang Ujian Ketat</div>
+                            </button>
+                            <button class="preset-profile-btn p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-cyan-500 text-xs font-semibold text-left" data-profile="normal">
+                                <div class="text-emerald-400 font-bold">Normal Kelas</div>
+                                <div class="text-[10px] text-slate-400">Standar Ujian SD</div>
+                            </button>
+                            <button class="preset-profile-btn p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xs font-semibold text-left" data-profile="noisy">
+                                <div class="text-yellow-400 font-bold">Ruangan Bising</div>
+                                <div class="text-[10px] text-slate-400">Suara Kipas/Luar</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Threshold Sliders -->
+                    <div class="space-y-4 pt-2">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                <span>Ambang Batas "Suara Terdeteksi" (Kuning)</span>
+                                <span id="val-thresh-detected" class="text-yellow-400">30 %</span>
+                            </div>
+                            <input type="range" id="slider-thresh-detected" min="10" max="60" value="30" class="w-full accent-yellow-400 cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                <span>Ambang Batas "Mulai Berisik" (Oranye)</span>
+                                <span id="val-thresh-noisy" class="text-orange-400">60 %</span>
+                            </div>
+                            <input type="range" id="slider-thresh-noisy" min="30" max="80" value="60" class="w-full accent-orange-400 cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                <span>Ambang Batas "Sangat Berisik" (Merah)</span>
+                                <span id="val-thresh-danger" class="text-red-400">85 %</span>
+                            </div>
+                            <input type="range" id="slider-thresh-danger" min="50" max="98" value="85" class="w-full accent-red-400 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: AUDIO ALERTS & TTS -->
+                <div id="tab-audio" class="tab-content hidden space-y-5">
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-200">Suara Peringatan Otomatis</h4>
+                                <p class="text-xs text-slate-400">Memberikan teguran ramah saat kelas berisik.</p>
+                            </div>
+                            <input type="checkbox" id="chk-audio-alerts" checked class="w-5 h-5 accent-cyan-500 rounded cursor-pointer">
+                        </div>
+
+                        <div class="space-y-3 pt-2 border-t border-slate-800">
+                            <div>
+                                <label class="text-xs font-bold text-slate-300">Jenis Peringatan</label>
+                                <select id="select-alert-type" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200">
+                                    <option value="tts">Suara Sintesis Bahasa Indonesia (TTS)</option>
+                                    <option value="beep">Nada Beep Lembut (Non-Verbal)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                    <span>Volume Peringatan</span>
+                                    <span id="val-alert-volume">80 %</span>
+                                </div>
+                                <input type="range" id="slider-alert-volume" min="0" max="100" value="80" class="w-full accent-cyan-400 cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                    <span>Jeda Cooldown Peringatan (Mencegah Pengulangan)</span>
+                                    <span id="val-alert-cooldown">10 Detik</span>
+                                </div>
+                                <input type="range" id="slider-alert-cooldown" min="5" max="30" value="10" class="w-full accent-cyan-400 cursor-pointer">
+                            </div>
+
+                            <div class="pt-2">
+                                <button id="btn-test-audio-alert" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-cyan-400 flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-volume-low"></i> Uji Coba Suara Peringatan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: BACKGROUND MANAGER -->
+                <div id="tab-bg" class="tab-content hidden space-y-5">
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-4">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">Upload Background PNG (16:9)</h4>
+                            <p class="text-xs text-slate-400">Unggah latar belakang gambar untuk kelas (disarankan ukuran 1920x1080 PNG).</p>
+                        </div>
+
+                        <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-700 hover:border-cyan-500 rounded-2xl p-6 transition bg-slate-950/40 text-center">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-cyan-400 mb-2"></i>
+                            <span class="text-xs text-slate-300 font-semibold mb-1">Klik atau seret file gambar ke sini</span>
+                            <span class="text-[10px] text-slate-500">Format disarankan: PNG / JPG 16:9 (Maks. 5MB)</span>
+                            <input type="file" id="input-bg-upload" accept="image/png, image/jpeg" class="hidden">
+                            <button onclick="document.getElementById('input-bg-upload').click()" class="mt-3 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold rounded-lg text-slate-200">
+                                Pilih File Gambar
+                            </button>
+                        </div>
+
+                        <div id="bg-warning-msg" class="hidden p-2.5 bg-amber-500/20 border border-amber-500/40 rounded-xl text-xs text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span id="bg-warning-text">Rasio gambar bukan 16:9. Gambar mungkin meregang.</span>
+                        </div>
+
+                        <!-- Image Fitting Controls -->
+                        <div class="grid grid-cols-2 gap-3 pt-2">
+                            <div>
+                                <label class="text-xs font-bold text-slate-300">Mode Tampilan</label>
+                                <select id="select-bg-mode" class="w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-slate-200">
+                                    <option value="cover">Cover (Memenuhi Layar)</option>
+                                    <option value="contain">Contain (Rasio Utuh)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                    <span>Kegelapan Overlay</span>
+                                    <span id="val-bg-overlay">85 %</span>
+                                </div>
+                                <input type="range" id="slider-bg-overlay" min="10" max="95" value="85" class="w-full accent-cyan-400 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button id="btn-reset-bg-default" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-300 rounded-xl transition">
+                                Kembalikan Background Default
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-700/80 bg-slate-900/80 flex justify-between items-center">
+                <button id="btn-reset-all-settings" class="text-xs text-red-400 hover:text-red-300 underline font-semibold">
+                    Reset Semua Pengaturan
+                </button>
+                <button id="btn-save-settings" class="px-6 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-cyan-900/40 transition">
+                    Simpan Pengaturan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MANUAL TIME SETTING MODAL ================= -->
+    <div id="manual-time-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-3xl border border-slate-700/80 p-6 space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-700/80 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-cyan-400"></i> Atur Durasi Ujian Manual
+                </h3>
+                <button id="btn-close-manual-time" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Jam</label>
+                    <input type="number" id="input-time-hours" min="0" max="12" value="0" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-xl font-bold text-cyan-300 digital-font">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Menit</label>
+                    <input type="number" id="input-time-minutes" min="0" max="59" value="60" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-xl font-bold text-cyan-300 digital-font">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase">Detik</label>
+                    <input type="number" id="input-time-seconds" min="0" max="59" value="0" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-xl font-bold text-cyan-300 digital-font">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2">
+                <button id="btn-cancel-manual-time" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 rounded-xl">
+                    Batal
+                </button>
+                <button id="btn-apply-manual-time" class="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-xs font-bold text-white rounded-xl shadow-lg shadow-cyan-900/40">
+                    Terapkan Durasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION JAVASCRIPT CODE -->
+    <script>
+        /**
+         * WAH SILENT EXAM MONITOR
+         * Built for WAH Official — Wiyanto Abu Hanif
+         * Multi-featured classroom silence manager & exam timer
+         */
+
+        // ================= LOGO & FAVICON AUTO-SETUP =================
+        (function initWahLogo() {
+            const logoImg = document.getElementById('wah-logo-img');
+            if (!logoImg) return;
+            const logoSrc = logoImg.src;
+            let favicon = document.querySelector("link[rel~='icon']");
+            if (!favicon) {
+                favicon = document.createElement('link');
+                favicon.rel = 'icon';
+                document.head.appendChild(favicon);
+            }
+            favicon.type = 'image/png';
+            favicon.href = logoSrc;
+            document.querySelectorAll('img.wah-logo-dynamic').forEach(img => { img.src = logoSrc; });
+        })();
+
+        // ================= APPLICATION STATE =================
+        const state = {
+            micActive: false,
+            audioCtx: null,
+            analyser: null,
+            micStream: null,
+            movingAvgLevel: 0,
+            isCalibrating: false,
+            isBlinking: false,
+
+            threshDetected: 30,
+            threshNoisy: 60,
+            threshDanger: 85,
+
+            audioAlertsEnabled: true,
+            alertType: 'tts',
+            alertVolume: 0.8,
+            alertCooldownSecs: 10,
+            lastAlertTimestamp: 0,
+
+            currentCondition: 1,
+
+            timerTotalSecs: 3600,
+            timerRemainingSecs: 3600,
+            timerRunning: false,
+            timerIntervalId: null,
+            targetEndTime: null,
+
+            bgOverlayOpacity: 0.85,
+            bgFitMode: 'cover',
+            customBgDataUrl: null,
+
+            focusMode: false
+        };
+
+        const DB_NAME = 'WahSilentExamMonitorDB';
+        const DB_STORE = 'app_assets';
+
+        // ================= DOM ELEMENT REFERENCES =================
+        const elements = {
+            realtimeClock: document.getElementById('realtime-clock'),
+            btnToggleMic: document.getElementById('btn-toggle-mic'),
+            micIndicatorDot: document.getElementById('mic-indicator-dot'),
+            micStatusText: document.getElementById('mic-status-text'),
+            btnToggleFocus: document.getElementById('btn-toggle-focus'),
+            iconFocus: document.getElementById('icon-focus'),
+            btnFullscreen: document.getElementById('btn-fullscreen'),
+            btnOpenSettings: document.getElementById('btn-open-settings'),
+            mainHeader: document.getElementById('main-header'),
+            mainFooter: document.getElementById('main-footer'),
+            mainContainer: document.querySelector('main'),
+
+            panelSilentMonitor: document.getElementById('panel-silent-monitor'),
+            noiseLevelBadge: document.getElementById('noise-level-badge'),
+            statusTitleText: document.getElementById('status-title-text'),
+            statusSubtitleText: document.getElementById('status-subtitle-text'),
+            noisePercentageText: document.getElementById('noise-percentage-text'),
+            noiseBarFill: document.getElementById('noise-bar-fill'),
+            markerDetected: document.getElementById('marker-detected'),
+            markerNoisy: document.getElementById('marker-noisy'),
+            markerDanger: document.getElementById('marker-danger'),
+
+            antennaLight: document.getElementById('antenna-light'),
+            leftEyeBg: document.getElementById('left-eye-bg'),
+            rightEyeBg: document.getElementById('right-eye-bg'),
+            leftEyelid: document.getElementById('left-eyelid'),
+            rightEyelid: document.getElementById('right-eyelid'),
+            robotMouth: document.getElementById('robot-mouth'),
+            leftCheek: document.getElementById('left-cheek'),
+            rightCheek: document.getElementById('right-cheek'),
+
+            timerDisplay: document.getElementById('timer-display'),
+            timerStatusBadge: document.getElementById('timer-status-badge'),
+            btnTimerStart: document.getElementById('btn-timer-start'),
+            btnTimerPause: document.getElementById('btn-timer-pause'),
+            btnTimerReset: document.getElementById('btn-timer-reset'),
+            btnAdd1m: document.getElementById('btn-add-1m'),
+            btnSub1m: document.getElementById('btn-sub-1m'),
+            btnManualTimeModal: document.getElementById('btn-manual-time-modal'),
+
+            settingsModal: document.getElementById('settings-modal'),
+            btnCloseSettings: document.getElementById('btn-close-settings'),
+            btnModalToggleMic: document.getElementById('btn-modal-toggle-mic'),
+            btnStartCalibration: document.getElementById('btn-start-calibration'),
+            calibrationProgressContainer: document.getElementById('calibration-progress-container'),
+            calibrationProgressBar: document.getElementById('calibration-progress-bar'),
+            calibrationTimerText: document.getElementById('calibration-timer-text'),
+            calibrationStatusText: document.getElementById('calibration-status-text'),
+
+            sliderThreshDetected: document.getElementById('slider-thresh-detected'),
+            sliderThreshNoisy: document.getElementById('slider-thresh-noisy'),
+            sliderThreshDanger: document.getElementById('slider-thresh-danger'),
+            valThreshDetected: document.getElementById('val-thresh-detected'),
+            valThreshNoisy: document.getElementById('val-thresh-noisy'),
+            valThreshDanger: document.getElementById('val-thresh-danger'),
+
+            chkAudioAlerts: document.getElementById('chk-audio-alerts'),
+            selectAlertType: document.getElementById('select-alert-type'),
+            sliderAlertVolume: document.getElementById('slider-alert-volume'),
+            valAlertVolume: document.getElementById('val-alert-volume'),
+            sliderAlertCooldown: document.getElementById('slider-alert-cooldown'),
+            valAlertCooldown: document.getElementById('val-alert-cooldown'),
+            btnTestAudioAlert: document.getElementById('btn-test-audio-alert'),
+
+            inputBgUpload: document.getElementById('input-bg-upload'),
+            bgWarningMsg: document.getElementById('bg-warning-msg'),
+            bgWarningText: document.getElementById('bg-warning-text'),
+            selectBgMode: document.getElementById('select-bg-mode'),
+            sliderBgOverlay: document.getElementById('slider-bg-overlay'),
+            valBgOverlay: document.getElementById('val-bg-overlay'),
+            btnResetBgDefault: document.getElementById('btn-reset-bg-default'),
+
+            btnSaveSettings: document.getElementById('btn-save-settings'),
+            btnResetAllSettings: document.getElementById('btn-reset-all-settings'),
+
+            manualTimeModal: document.getElementById('manual-time-modal'),
+            btnCloseManualTime: document.getElementById('btn-close-manual-time'),
+            btnCancelManualTime: document.getElementById('btn-cancel-manual-time'),
+            btnApplyManualTime: document.getElementById('btn-apply-manual-time'),
+            inputTimeHours: document.getElementById('input-time-hours'),
+            inputTimeMinutes: document.getElementById('input-time-minutes'),
+            inputTimeSeconds: document.getElementById('input-time-seconds'),
+
+            bgCanvasContainer: document.getElementById('bg-canvas-container'),
+            bgOverlay: document.getElementById('bg-overlay')
+        };
+
+        // ================= INDEXED DB UTILITIES FOR BACKGROUND =================
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(DB_STORE)) {
+                        db.createObjectStore(DB_STORE);
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        async function saveBgToDB(dataUrl) {
+            try {
+                const db = await initDB();
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).put(dataUrl, 'custom_bg');
+            } catch (err) {
+                console.warn("Gagal menyimpan background ke IndexedDB:", err);
+            }
+        }
+
+        async function loadBgFromDB() {
+            try {
+                const db = await initDB();
+                const tx = db.transaction(DB_STORE, 'readonly');
+                const req = tx.objectStore(DB_STORE).get('custom_bg');
+                return new Promise((resolve) => {
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (err) {
+                return null;
+            }
+        }
+
+        async function removeBgFromDB() {
+            try {
+                const db = await initDB();
+                const tx = db.transaction(DB_STORE, 'readwrite');
+                tx.objectStore(DB_STORE).delete('custom_bg');
+            } catch (err) {
+                console.warn(err);
+            }
+        }
+
+        // ================= SETTINGS (LOCALSTORAGE) =================
+        function loadSavedSettings() {
+            try {
+                const saved = localStorage.getItem('wah_silent_exam_config');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (typeof parsed.threshDetected === 'number') state.threshDetected = parsed.threshDetected;
+                    if (typeof parsed.threshNoisy === 'number') state.threshNoisy = parsed.threshNoisy;
+                    if (typeof parsed.threshDanger === 'number') state.threshDanger = parsed.threshDanger;
+                    if (typeof parsed.audioAlertsEnabled === 'boolean') state.audioAlertsEnabled = parsed.audioAlertsEnabled;
+                    if (typeof parsed.alertType === 'string') state.alertType = parsed.alertType;
+                    if (typeof parsed.alertVolume === 'number') state.alertVolume = parsed.alertVolume;
+                    if (typeof parsed.alertCooldownSecs === 'number') state.alertCooldownSecs = parsed.alertCooldownSecs;
+                    if (typeof parsed.bgOverlayOpacity === 'number') state.bgOverlayOpacity = parsed.bgOverlayOpacity;
+                    if (typeof parsed.bgFitMode === 'string') state.bgFitMode = parsed.bgFitMode;
+                }
+            } catch (err) {
+                console.warn("Gagal memuat pengaturan:", err);
+            }
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem('wah_silent_exam_config', JSON.stringify({
+                    threshDetected: state.threshDetected,
+                    threshNoisy: state.threshNoisy,
+                    threshDanger: state.threshDanger,
+                    audioAlertsEnabled: state.audioAlertsEnabled,
+                    alertType: state.alertType,
+                    alertVolume: state.alertVolume,
+                    alertCooldownSecs: state.alertCooldownSecs,
+                    bgOverlayOpacity: state.bgOverlayOpacity,
+                    bgFitMode: state.bgFitMode
+                }));
+            } catch (err) {
+                console.warn("Gagal menyimpan pengaturan:", err);
+            }
+        }
+
+        function applySettingsToUI() {
+            elements.sliderThreshDetected.value = state.threshDetected;
+            elements.valThreshDetected.textContent = state.threshDetected + ' %';
+            elements.sliderThreshNoisy.value = state.threshNoisy;
+            elements.valThreshNoisy.textContent = state.threshNoisy + ' %';
+            elements.sliderThreshDanger.value = state.threshDanger;
+            elements.valThreshDanger.textContent = state.threshDanger + ' %';
+
+            elements.chkAudioAlerts.checked = state.audioAlertsEnabled;
+            elements.selectAlertType.value = state.alertType;
+            elements.sliderAlertVolume.value = Math.round(state.alertVolume * 100);
+            elements.valAlertVolume.textContent = Math.round(state.alertVolume * 100) + ' %';
+            elements.sliderAlertCooldown.value = state.alertCooldownSecs;
+            elements.valAlertCooldown.textContent = state.alertCooldownSecs + ' Detik';
+
+            elements.selectBgMode.value = state.bgFitMode;
+            elements.sliderBgOverlay.value = Math.round(state.bgOverlayOpacity * 100);
+            elements.valBgOverlay.textContent = Math.round(state.bgOverlayOpacity * 100) + ' %';
+
+            updateThresholdMarkers();
+        }
+
+        function updateThresholdMarkers() {
+            elements.markerDetected.style.left = state.threshDetected + '%';
+            elements.markerNoisy.style.left = state.threshNoisy + '%';
+            elements.markerDanger.style.left = state.threshDanger + '%';
+        }
+
+        // ================= ROBOT MASCOT EXPRESSIONS =================
+        const EYELID_PATHS = {
+            open: 'M -18 -18 L 18 -18 L 18 -14 L -18 -14 Z',
+            semi: 'M -18 -18 L 18 -18 L 18 2 L -18 2 Z',
+            closed: 'M -18 -18 L 18 -18 L 18 15 L -18 15 Z'
+        };
+
+        const EXPRESSIONS = {
+            1: { color: '#10b981', eyelid: 'open', mouth: 'M 80 120 Q 100 128 120 120', cheek: 0.35, glow: 'glow-quiet',
+                 badgeText: 'Sangat Tenang', badgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+                 title: 'KELAS TENANG', titleClass: 'text-emerald-400', subtitle: 'Pertahankan keheningan 🤫' },
+            2: { color: '#eab308', eyelid: 'open', mouth: 'M 82 123 L 118 123', cheek: 0.15, glow: 'glow-detected',
+                 badgeText: 'Terdeteksi', badgeClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40',
+                 title: 'SUARA TERDETEKSI', titleClass: 'text-yellow-400', subtitle: 'Tetap tenang, jangan bertambah keras 🤫' },
+            3: { color: '#f97316', eyelid: 'semi', mouth: 'M 80 126 Q 100 114 120 126', cheek: 0, glow: 'glow-noisy',
+                 badgeText: 'Berisik', badgeClass: 'bg-orange-500/20 text-orange-400 border-orange-500/40',
+                 title: 'MULAI BERISIK', titleClass: 'text-orange-400', subtitle: 'Ssst... mohon hening, ujian berlangsung 😐' },
+            4: { color: '#ef4444', eyelid: 'semi', mouth: 'M 78 128 Q 100 110 122 128', cheek: 0, glow: 'glow-danger',
+                 badgeText: 'Bahaya', badgeClass: 'bg-red-500/20 text-red-400 border-red-500/40',
+                 title: 'SANGAT BERISIK!', titleClass: 'text-red-400', subtitle: 'Teguran otomatis sedang dikirim 🚨' }
+        };
+
+        function setEyelids(mode) {
+            elements.leftEyelid.setAttribute('d', EYELID_PATHS[mode]);
+            elements.rightEyelid.setAttribute('d', EYELID_PATHS[mode]);
+        }
+
+        function setRobotExpression(condition) {
+            state.currentCondition = condition;
+            const exp = EXPRESSIONS[condition];
+
+            elements.leftEyeBg.setAttribute('fill', exp.color);
+            elements.rightEyeBg.setAttribute('fill', exp.color);
+            elements.antennaLight.setAttribute('fill', exp.color);
+            elements.robotMouth.setAttribute('d', exp.mouth);
+            elements.robotMouth.setAttribute('stroke', exp.color);
+            elements.leftCheek.setAttribute('opacity', exp.cheek);
+            elements.rightCheek.setAttribute('opacity', exp.cheek);
+            if (!state.isBlinking) setEyelids(exp.eyelid);
+
+            elements.panelSilentMonitor.classList.remove('glow-quiet', 'glow-detected', 'glow-noisy', 'glow-danger');
+            elements.panelSilentMonitor.classList.add(exp.glow);
+
+            elements.noiseLevelBadge.textContent = exp.badgeText;
+            elements.noiseLevelBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border transition-colors ' + exp.badgeClass;
+
+            elements.statusTitleText.textContent = exp.title;
+            elements.statusTitleText.className = 'text-2xl font-extrabold tracking-wide transition-colors ' + exp.titleClass;
+            elements.statusSubtitleText.textContent = exp.subtitle;
+        }
+
+        // Robot idle blink (only when calm)
+        setInterval(() => {
+            if (state.currentCondition === 1 && !state.isBlinking) {
+                state.isBlinking = true;
+                setEyelids('closed');
+                setTimeout(() => { setEyelids('open'); state.isBlinking = false; }, 160);
+            }
+        }, 4200);
+
+        // ================= MICROPHONE & NOISE ANALYSIS =================
+        async function startMic() {
+            try {
+                state.micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = state.audioCtx.createMediaStreamSource(state.micStream);
+                state.analyser = state.audioCtx.createAnalyser();
+                state.analyser.fftSize = 1024;
+                source.connect(state.analyser);
+                state.micActive = true;
+                updateMicUI();
+                audioAnalysisLoop();
+            } catch (err) {
+                console.error(err);
+                alert('Tidak dapat mengakses mikrofon. Pastikan izin mikrofon telah diizinkan di browser Anda.');
+            }
+        }
+
+        function stopMic() {
+            if (state.micStream) state.micStream.getTracks().forEach(t => t.stop());
+            if (state.audioCtx && state.audioCtx.state !== 'closed') {
+                try { state.audioCtx.close(); } catch (e) {}
+            }
+            state.micStream = null;
+            state.audioCtx = null;
+            state.analyser = null;
+            state.micActive = false;
+            state.movingAvgLevel = 0;
+            updateNoiseUI(0);
+            updateMicUI();
+        }
+
+        function toggleMic() {
+            if (state.micActive) stopMic();
+            else startMic();
+        }
+
+        function updateMicUI() {
+            if (state.micActive) {
+                elements.micIndicatorDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+                elements.micStatusText.textContent = 'Mikrofon Aktif';
+                elements.btnToggleMic.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all border bg-emerald-600/20 border-emerald-500/50 text-emerald-300 hover:bg-emerald-600/30';
+                elements.btnModalToggleMic.textContent = 'Nonaktifkan Mikrofon';
+                elements.btnModalToggleMic.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition';
+            } else {
+                elements.micIndicatorDot.className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
+                elements.micStatusText.textContent = 'Mikrofon Nonaktif';
+                elements.btnToggleMic.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all border bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700';
+                elements.btnModalToggleMic.textContent = 'Aktifkan Mikrofon';
+                elements.btnModalToggleMic.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white transition';
+            }
+        }
+
+        function audioAnalysisLoop() {
+            if (!state.micActive || !state.analyser) return;
+            const data = new Uint8Array(state.analyser.fftSize);
+            state.analyser.getByteTimeDomainData(data);
+            let sum = 0;
+            for (let i = 0; i < data.length; i++) {
+                const v = (data[i] - 128) / 128;
+                sum += v * v;
+            }
+            const rms = Math.sqrt(sum / data.length);
+            const level = Math.min(100, Math.round(rms * 280));
+            state.movingAvgLevel = (state.movingAvgLevel * 0.8) + (level * 0.2);
+            updateNoiseUI(Math.round(state.movingAvgLevel));
+            requestAnimationFrame(audioAnalysisLoop);
+        }
+
+        function updateNoiseUI(percentage) {
+            elements.noisePercentageText.textContent = percentage + ' %';
+            elements.noiseBarFill.style.width = percentage + '%';
+
+            let condition = 1;
+            if (percentage >= state.threshDanger) condition = 4;
+            else if (percentage >= state.threshNoisy) condition = 3;
+            else if (percentage >= state.threshDetected) condition = 2;
+
+            if (condition !== state.currentCondition) setRobotExpression(condition);
+
+            if (condition >= 2 && state.audioAlertsEnabled && state.micActive && !state.isCalibrating) {
+                const now = Date.now();
+                if (now - state.lastAlertTimestamp > state.alertCooldownSecs * 1000) {
+                    triggerAlert(condition);
+                }
+            }
+        }
+
+        // ================= AUDIO ALERTS (TTS & BEEP) =================
+        let alertAudioCtx = null;
+        function getAlertCtx() {
+            if (!alertAudioCtx || alertAudioCtx.state === 'closed') {
+                alertAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (alertAudioCtx.state === 'suspended') alertAudioCtx.resume();
+            return alertAudioCtx;
+        }
+
+        function speakTTS(text) {
+            try {
+                if (!('speechSynthesis' in window)) return;
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'id-ID';
+                u.volume = state.alertVolume;
+                u.rate = 1;
+                window.speechSynthesis.speak(u);
+            } catch (e) { console.warn(e); }
+        }
+
+        function playBeep(condition) {
+            try {
+                const ctx = getAlertCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = condition === 4 ? 880 : (condition === 3 ? 660 : 520);
+                const t = ctx.currentTime;
+                gain.gain.setValueAtTime(Math.max(0.01, state.alertVolume * 0.3), t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.start(t);
+                osc.stop(t + 0.45);
+            } catch (e) { console.warn(e); }
+        }
+
+        function triggerAlert(condition) {
+            state.lastAlertTimestamp = Date.now();
+            if (state.alertType === 'tts') {
+                const messages = {
+                    2: 'Psst... tetap tenang ya.',
+                    3: 'Perhatian. Suara kelas mulai berisik. Mohon hening.',
+                    4: 'Kelas sangat berisik. Mohon segera hening. Ujian sedang berlangsung.'
+                };
+                speakTTS(messages[condition] || messages[3]);
+            } else {
+                playBeep(condition);
+            }
+        }
+
+        // ================= ROOM CALIBRATION =================
+        function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
+
+        function startCalibration() {
+            if (!state.micActive) {
+                alert('Aktifkan mikrofon terlebih dahulu sebelum melakukan kalibrasi.');
+                return;
+            }
+            if (state.isCalibrating) return;
+            state.isCalibrating = true;
+            elements.calibrationProgressContainer.classList.remove('hidden');
+            elements.calibrationStatusText.textContent = 'Mengukur suara ruangan...';
+            let elapsed = 0;
+            const total = 5;
+            const samples = [];
+            elements.calibrationTimerText.textContent = total + 's';
+            elements.calibrationProgressBar.style.width = '0%';
+
+            const iv = setInterval(() => {
+                elapsed++;
+                samples.push(Math.round(state.movingAvgLevel));
+                elements.calibrationTimerText.textContent = (total - elapsed) + 's';
+                elements.calibrationProgressBar.style.width = (elapsed / total * 100) + '%';
+                if (elapsed >= total) {
+                    clearInterval(iv);
+                    const baseline = samples.reduce((a, b) => a + b, 0) / samples.length;
+                    const detected = clamp(Math.round(baseline + 12), 10, 55);
+                    const noisy = clamp(Math.round(baseline + 28), detected + 5, 78);
+                    const danger = clamp(Math.round(baseline + 45), noisy + 5, 98);
+                    state.threshDetected = detected;
+                    state.threshNoisy = noisy;
+                    state.threshDanger = danger;
+                    applySettingsToUI();
+                    saveSettings();
+                    elements.calibrationStatusText.textContent = 'Kalibrasi selesai! Baseline ruangan: ' + Math.round(baseline) + ' %';
+                    state.isCalibrating = false;
+                    setTimeout(() => {
+                        elements.calibrationProgressContainer.classList.add('hidden');
+                        elements.calibrationProgressBar.style.width = '0%';
+                    }, 3000);
+                }
+            }, 1000);
+        }
+
+        // ================= EXAM TIMER =================
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function updateTimerDisplay() {
+            const s = Math.max(0, state.timerRemainingSecs);
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            elements.timerDisplay.textContent = pad(h) + ':' + pad(m) + ':' + pad(sec);
+        }
+
+        function setTimerBadge(text, cls) {
+            elements.timerStatusBadge.textContent = text;
+            elements.timerStatusBadge.className = 'px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ' + cls;
+        }
+
+        function setTimerControlsUI() {
+            if (state.timerRunning) {
+                elements.btnTimerStart.disabled = true;
+                elements.btnTimerStart.classList.add('opacity-50', 'cursor-not-allowed');
+                elements.btnTimerPause.disabled = false;
+                elements.btnTimerPause.className = 'py-3.5 px-4 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl flex items-center justify-center space-x-2 transition transform active:scale-95';
+            } else {
+                elements.btnTimerStart.disabled = false;
+                elements.btnTimerStart.classList.remove('opacity-50', 'cursor-not-allowed');
+                elements.btnTimerPause.disabled = true;
+                elements.btnTimerPause.className = 'py-3.5 px-4 bg-slate-800 border border-slate-700 text-slate-400 font-bold rounded-xl flex items-center justify-center space-x-2 transition opacity-50 cursor-not-allowed';
+            }
+        }
+
+        function startTimer() {
+            if (state.timerRunning || state.timerRemainingSecs <= 0) return;
+            state.timerRunning = true;
+            state.targetEndTime = Date.now() + state.timerRemainingSecs * 1000;
+            setTimerBadge('BERJALAN', 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40');
+            setTimerControlsUI();
+            state.timerIntervalId = setInterval(timerTick, 500);
+        }
+
+        function timerTick() {
+            state.timerRemainingSecs = Math.round((state.targetEndTime - Date.now()) / 1000);
+            if (state.timerRemainingSecs <= 0) {
+                finishTimer();
+                return;
+            }
+            updateTimerDisplay();
+        }
+
+        function pauseTimer() {
+            if (!state.timerRunning) return;
+            clearInterval(state.timerIntervalId);
+            state.timerRunning = false;
+            setTimerBadge('JEDA', 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40');
+            setTimerControlsUI();
+        }
+
+        function resetTimer() {
+            clearInterval(state.timerIntervalId);
+            state.timerRunning = false;
+            state.timerRemainingSecs = state.timerTotalSecs;
+            updateTimerDisplay();
+            setTimerBadge('SIAP', 'bg-slate-800 text-slate-300 border-slate-700');
+            setTimerControlsUI();
+        }
+
+        function finishTimer() {
+            clearInterval(state.timerIntervalId);
+            state.timerRunning = false;
+            state.timerRemainingSecs = 0;
+            updateTimerDisplay();
+            setTimerBadge('SELESAI', 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40');
+            setTimerControlsUI();
+            playBeep(4);
+            speakTTS('Waktu ujian telah selesai. Terima kasih.');
+        }
+
+        function setTotalTimer(secs) {
+            if (!secs || secs <= 0) return;
+            state.timerTotalSecs = secs;
+            if (!state.timerRunning) {
+                state.timerRemainingSecs = secs;
+                updateTimerDisplay();
+                setTimerBadge('SIAP', 'bg-slate-800 text-slate-300 border-slate-700');
+            }
+        }
+
+        function adjustOneMinute(delta) {
+            if (state.timerRunning) {
+                state.targetEndTime += delta * 60000;
+                state.timerTotalSecs = Math.max(60, state.timerTotalSecs + delta * 60);
+            } else {
+                const newSecs = Math.max(60, state.timerRemainingSecs + delta * 60);
+                state.timerRemainingSecs = newSecs;
+                state.timerTotalSecs = newSecs;
+            }
+            updateTimerDisplay();
+        }
+
+        // ================= BACKGROUND MANAGER =================
+        function applyBackground() {
+            if (state.customBgDataUrl) {
+                elements.bgCanvasContainer.style.backgroundImage = 'url(' + state.customBgDataUrl + ')';
+            } else {
+                elements.bgCanvasContainer.style.backgroundImage = 'linear-gradient(135deg, #0f172a 0%, #16324f 45%, #0b1329 100%)';
+            }
+            elements.bgCanvasContainer.style.backgroundSize = state.bgFitMode === 'cover' ? 'cover' : 'contain';
+            elements.bgOverlay.style.backgroundColor = 'rgba(11, 19, 41, ' + state.bgOverlayOpacity + ')';
+        }
+
+        function handleBgUpload(file) {
+            if (!file) return;
+            if (!/^image\/(png|jpeg)$/.test(file.type)) {
+                alert('Format file tidak didukung. Gunakan PNG atau JPG.');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran file melebihi 5MB. Gunakan gambar yang lebih kecil.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    const ratio = img.width / img.height;
+                    const is169 = Math.abs(ratio - 16 / 9) < 0.05;
+                    if (!is169) {
+                        elements.bgWarningText.textContent = 'Rasio gambar ' + img.width + 'x' + img.height + ' bukan 16:9. Gambar mungkin meregang.';
+                        elements.bgWarningMsg.classList.remove('hidden');
+                    } else {
+                        elements.bgWarningMsg.classList.add('hidden');
+                    }
+                    state.customBgDataUrl = dataUrl;
+                    applyBackground();
+                    saveBgToDB(dataUrl);
+                };
+                img.src = dataUrl;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ================= FOCUS MODE & FULLSCREEN =================
+        function toggleFocusMode() {
+            state.focusMode = !state.focusMode;
+            if (state.focusMode) {
+                elements.mainHeader.classList.add('hidden');
+                elements.mainFooter.classList.add('hidden');
+                elements.mainContainer.classList.remove('max-w-7xl');
+                elements.iconFocus.className = 'fa-solid fa-compress text-cyan-400';
+            } else {
+                elements.mainHeader.classList.remove('hidden');
+                elements.mainFooter.classList.remove('hidden');
+                elements.mainContainer.classList.add('max-w-7xl');
+                elements.iconFocus.className = 'fa-solid fa-expand text-cyan-400';
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // ================= REALTIME CLOCK =================
+        function startClock() {
+            const update = () => {
+                elements.realtimeClock.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            };
+            update();
+            setInterval(update, 1000);
+        }
+
+        // ================= MODALS & TABS =================
+        function openSettings() { elements.settingsModal.classList.remove('hidden'); }
+        function closeSettings() { elements.settingsModal.classList.add('hidden'); }
+        function openManualTime() {
+            const s = Math.max(0, state.timerRemainingSecs);
+            elements.inputTimeHours.value = Math.floor(s / 3600);
+            elements.inputTimeMinutes.value = Math.floor((s % 3600) / 60);
+            elements.inputTimeSeconds.value = s % 60;
+            elements.manualTimeModal.classList.remove('hidden');
+        }
+        function closeManualTime() { elements.manualTimeModal.classList.add('hidden'); }
+
+        function setupTabs() {
+            const activeCls = 'tab-btn px-4 py-2 text-cyan-400 border-b-2 border-cyan-400 font-bold flex items-center gap-2';
+            const inactiveCls = 'tab-btn px-4 py-2 text-slate-400 hover:text-slate-200 flex items-center gap-2';
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => { b.className = inactiveCls; });
+                    btn.className = activeCls;
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+                    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+                });
+            });
+        }
+
+        // ================= EVENT BINDINGS =================
+        function bindEvents() {
+            // Header controls
+            elements.btnToggleMic.addEventListener('click', toggleMic);
+            elements.btnModalToggleMic.addEventListener('click', toggleMic);
+            elements.btnToggleFocus.addEventListener('click', toggleFocusMode);
+            elements.btnFullscreen.addEventListener('click', toggleFullscreen);
+            elements.btnOpenSettings.addEventListener('click', openSettings);
+            elements.btnCloseSettings.addEventListener('click', closeSettings);
+
+            // Timer controls
+            elements.btnTimerStart.addEventListener('click', startTimer);
+            elements.btnTimerPause.addEventListener('click', pauseTimer);
+            elements.btnTimerReset.addEventListener('click', resetTimer);
+            elements.btnAdd1m.addEventListener('click', () => adjustOneMinute(1));
+            elements.btnSub1m.addEventListener('click', () => adjustOneMinute(-1));
+            elements.btnManualTimeModal.addEventListener('click', openManualTime);
+            elements.btnCloseManualTime.addEventListener('click', closeManualTime);
+            elements.btnCancelManualTime.addEventListener('click', closeManualTime);
+            elements.btnApplyManualTime.addEventListener('click', () => {
+                const h = parseInt(elements.inputTimeHours.value) || 0;
+                const m = parseInt(elements.inputTimeMinutes.value) || 0;
+                const s = parseInt(elements.inputTimeSeconds.value) || 0;
+                const total = h * 3600 + m * 60 + s;
+                if (total <= 0) {
+                    alert('Durasi ujian harus lebih dari 0 detik.');
+                    return;
+                }
+                setTotalTimer(total);
+                closeManualTime();
+            });
+
+            // Preset duration buttons
+            const presetBase = 'preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-semibold rounded-lg text-slate-300 transition';
+            const presetActive = 'preset-btn px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 border border-cyan-500/40 text-xs font-semibold rounded-lg font-bold text-cyan-400 transition';
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-btn').forEach(b => { b.className = presetBase; });
+                    btn.className = presetActive;
+                    setTotalTimer(parseInt(btn.dataset.mins) * 60);
+                });
+            });
+
+            // Preset profile buttons (thresholds)
+            const profiles = {
+                quiet: { detected: 20, noisy: 45, danger: 70 },
+                normal: { detected: 30, noisy: 60, danger: 85 },
+                noisy: { detected: 40, noisy: 65, danger: 90 }
+            };
+            const profileBase = 'preset-profile-btn p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-700 text-xs font-semibold text-left';
+            const profileActive = 'preset-profile-btn p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl border border-cyan-500 text-xs font-semibold text-left';
+            document.querySelectorAll('.preset-profile-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preset-profile-btn').forEach(b => { b.className = profileBase; });
+                    btn.className = profileActive;
+                    const p = profiles[btn.dataset.profile];
+                    state.threshDetected = p.detected;
+                    state.threshNoisy = p.noisy;
+                    state.threshDanger = p.danger;
+                    applySettingsToUI();
+                    saveSettings();
+                });
+            });
+
+            // Threshold sliders (with ordering enforcement)
+            elements.sliderThreshDetected.addEventListener('input', (e) => {
+                let v = parseInt(e.target.value);
+                v = Math.min(v, state.threshNoisy - 5);
+                state.threshDetected = clamp(v, 10, 60);
+                e.target.value = state.threshDetected;
+                elements.valThreshDetected.textContent = state.threshDetected + ' %';
+                updateThresholdMarkers();
+            });
+            elements.sliderThreshDetected.addEventListener('change', saveSettings);
+
+            elements.sliderThreshNoisy.addEventListener('input', (e) => {
+                let v = parseInt(e.target.value);
+                v = clamp(v, state.threshDetected + 5, state.threshDanger - 5);
+                state.threshNoisy = v;
+                e.target.value = v;
+                elements.valThreshNoisy.textContent = v + ' %';
+                updateThresholdMarkers();
+            });
+            elements.sliderThreshNoisy.addEventListener('change', saveSettings);
+
+            elements.sliderThreshDanger.addEventListener('input', (e) => {
+                let v = parseInt(e.target.value);
+                v = Math.max(v, state.threshNoisy + 5);
+                state.threshDanger = clamp(v, 50, 98);
+                e.target.value = state.threshDanger;
+                elements.valThreshDanger.textContent = state.threshDanger + ' %';
+                updateThresholdMarkers();
+            });
+            elements.sliderThreshDanger.addEventListener('change', saveSettings);
+
+            // Calibration
+            elements.btnStartCalibration.addEventListener('click', startCalibration);
+
+            // Audio alert settings
+            elements.chkAudioAlerts.addEventListener('change', (e) => {
+                state.audioAlertsEnabled = e.target.checked;
+                saveSettings();
+            });
+            elements.selectAlertType.addEventListener('change', (e) => {
+                state.alertType = e.target.value;
+                saveSettings();
+            });
+            elements.sliderAlertVolume.addEventListener('input', (e) => {
+                state.alertVolume = parseInt(e.target.value) / 100;
+                elements.valAlertVolume.textContent = e.target.value + ' %';
+            });
+            elements.sliderAlertVolume.addEventListener('change', saveSettings);
+            elements.sliderAlertCooldown.addEventListener('input', (e) => {
+                state.alertCooldownSecs = parseInt(e.target.value);
+                elements.valAlertCooldown.textContent = e.target.value + ' Detik';
+            });
+            elements.sliderAlertCooldown.addEventListener('change', saveSettings);
+            elements.btnTestAudioAlert.addEventListener('click', () => {
+                state.lastAlertTimestamp = 0;
+                triggerAlert(3);
+            });
+
+            // Background settings
+            elements.inputBgUpload.addEventListener('change', (e) => handleBgUpload(e.target.files[0]));
+            elements.selectBgMode.addEventListener('change', (e) => {
+                state.bgFitMode = e.target.value;
+                applyBackground();
+                saveSettings();
+            });
+            elements.sliderBgOverlay.addEventListener('input', (e) => {
+                state.bgOverlayOpacity = parseInt(e.target.value) / 100;
+                elements.valBgOverlay.textContent = e.target.value + ' %';
+                applyBackground();
+            });
+            elements.sliderBgOverlay.addEventListener('change', saveSettings);
+            elements.btnResetBgDefault.addEventListener('click', () => {
+                state.customBgDataUrl = null;
+                elements.bgWarningMsg.classList.add('hidden');
+                applyBackground();
+                removeBgFromDB();
+            });
+
+            // Save / reset all settings
+            elements.btnSaveSettings.addEventListener('click', () => {
+                saveSettings();
+                closeSettings();
+            });
+            elements.btnResetAllSettings.addEventListener('click', () => {
+                if (!confirm('Yakin ingin mereset semua pengaturan ke default?')) return;
+                localStorage.removeItem('wah_silent_exam_config');
+                state.threshDetected = 30;
+                state.threshNoisy = 60;
+                state.threshDanger = 85;
+                state.audioAlertsEnabled = true;
+                state.alertType = 'tts';
+                state.alertVolume = 0.8;
+                state.alertCooldownSecs = 10;
+                state.bgOverlayOpacity = 0.85;
+                state.bgFitMode = 'cover';
+                state.customBgDataUrl = null;
+                applySettingsToUI();
+                applyBackground();
+                removeBgFromDB();
+            });
+
+            // Close modals with Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeSettings();
+                    closeManualTime();
+                }
+            });
+        }
+
+        // ================= INITIALIZATION =================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedSettings();
+            applySettingsToUI();
+            updateMicUI();
+            setRobotExpression(1);
+            updateTimerDisplay();
+            setTimerControlsUI();
+            startClock();
+            setupTabs();
+            bindEvents();
+            loadBgFromDB().then(url => {
+                if (url) state.customBgDataUrl = url;
+                applyBackground();
+            });
+        });
+    </script>
+</body>
+</html>
